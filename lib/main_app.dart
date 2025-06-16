@@ -1,13 +1,7 @@
+import 'package:api_test/dog_data.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
-// 🔴 NEU: Datenklasse für Bild + Rasse
-class DogData {
-  final String imageUrl;
-  final String breed;
-  DogData(this.imageUrl, this.breed);
-}
 
 class MainApp extends StatefulWidget {
   const MainApp({super.key});
@@ -17,9 +11,10 @@ class MainApp extends StatefulWidget {
 }
 
 class _MainAppState extends State<MainApp> {
-  Future<DogData>? _dogFuture;
+  Future<DogData>? _dog;
 
-  // 🔴 NEU: Liefert DogData statt nur URL
+  //                                                 liefert DogData über API
+
   Future<DogData> fetchRandomDog() async {
     final response = await http.get(
       Uri.parse('https://dog.ceo/api/breeds/image/random'),
@@ -45,15 +40,26 @@ class _MainAppState extends State<MainApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        appBar: AppBar(title: Text("Hundeanzeige")),
+        backgroundColor: const Color.fromARGB(255, 192, 255, 252),
+        appBar: AppBar(
+          title: Text(
+            "DOG-API  APP",
+            style: TextStyle(fontWeight: FontWeight.w700),
+          ),
+          foregroundColor: const Color.fromARGB(255, 1, 106, 101),
+          backgroundColor: const Color.fromARGB(255, 110, 228, 222),
+          elevation: 3,
+          shadowColor: const Color.fromARGB(255, 0, 146, 139),
+          // backgroundColor: const Color.fromARGB(255, 173, 235, 232),
+        ),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // 🔴 NEU: FutureBuilder statt State-Variablen
-              if (_dogFuture != null)
+              // Aufrufen aus der API
+              if (_dog != null)
                 FutureBuilder<DogData>(
-                  future: _dogFuture,
+                  future: _dog,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return CircularProgressIndicator();
@@ -63,16 +69,43 @@ class _MainAppState extends State<MainApp> {
                       final dog = snapshot.data!;
                       return Column(
                         children: [
-                          Image.network(dog.imageUrl),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.network(
+                              dog.imageUrl,
+                              height: 350,
+                              width: 350,
+                              fit: BoxFit.cover,
+                              loadingBuilder: (context, child, progress) {
+                                if (progress == null) return child;
+                                return SizedBox(
+                                  height: 250,
+                                  width: 250,
+                                  child: Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                );
+                              },
+                              errorBuilder: (context, error, stackTrace) {
+                                return SizedBox(
+                                  height: 250,
+                                  width: 250,
+                                  child: Center(child: Icon(Icons.error)),
+                                );
+                              },
+                            ),
+                          ),
+                          // Image.network(dog.imageUrl),
                           SizedBox(height: 10),
                           Text(
                             dog.breed,
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
+                              color: const Color.fromARGB(255, 1, 60, 57),
                             ),
                           ),
-                          SizedBox(height: 20),
+                          SizedBox(height: 40),
                         ],
                       );
                     } else {
@@ -84,10 +117,24 @@ class _MainAppState extends State<MainApp> {
               FilledButton(
                 onPressed: () {
                   setState(() {
-                    _dogFuture = fetchRandomDog();
+                    _dog = fetchRandomDog();
                   });
                 },
-                child: Text("Hund anzeigen"),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Text(
+                    "New One",
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: const Color.fromARGB(255, 1, 106, 101),
+                    ),
+                  ),
+                ),
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 110, 228, 222),
+                  shadowColor: const Color.fromARGB(255, 0, 146, 139),
+                  elevation: 3,
+                ),
               ),
             ],
           ),
@@ -97,4 +144,4 @@ class _MainAppState extends State<MainApp> {
   }
 }
 
-// fasknjdfd
+// dawsdas
